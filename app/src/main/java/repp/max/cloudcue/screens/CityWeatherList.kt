@@ -11,10 +11,8 @@ import androidx.navigation.NavHostController
 import repp.max.cloudcue.screens.model.State
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import repp.max.cloudcue.screens.model.Effect
 
 
 @Composable
