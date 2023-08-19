@@ -3,6 +3,7 @@ package repp.max.cloudcue.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
 import repp.max.cloudcue.screens.model.Event
 import repp.max.cloudcue.screens.model.Effect
 import repp.max.cloudcue.screens.model.State
@@ -21,6 +23,8 @@ import javax.inject.Inject
 class CityWeatherViewModel @Inject constructor(
     private val getWeatherListUseCase: GetWeatherListUseCase
 ) : ViewModel() {
+    private val singleThreadContext = Dispatchers.Default.limitedParallelism(1)
+
     private val _state = MutableStateFlow<State>(State.Loading)
     val state: StateFlow<State> = _state
 
@@ -41,9 +45,9 @@ class CityWeatherViewModel @Inject constructor(
         }
         viewModelScope.launch {
             getWeatherListUseCase.getList().collect {
-                //todo threading
-                _state.emit(State.WeatherList(it))
-
+                viewModelScope.launch(singleThreadContext) {
+                    _state.emit(State.WeatherList(it))
+                }
             }
         }
     }
