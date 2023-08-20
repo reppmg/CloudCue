@@ -1,6 +1,7 @@
 package repp.max.cloudcue.api
 
 import repp.max.cloudcue.api.models.CityLocation
+import repp.max.cloudcue.api.models.CityWeatherDetailsDto
 import repp.max.cloudcue.api.models.CityWeatherDto
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -24,5 +25,11 @@ interface WeatherApi {
         @Query("lat") latitude: Double,
         @Query("lon") longitude: Double
     ): List<CityLocation>
+
+    @GET("data/2.5/forecast")
+    suspend fun getDetails(
+        @Query("lat") latitude: Double,
+        @Query("lon") longitude: Double
+    ): CityWeatherDetailsDto
 
 }

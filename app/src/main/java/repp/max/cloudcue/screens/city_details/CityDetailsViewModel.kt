@@ -2,27 +2,33 @@ package repp.max.cloudcue.screens.city_details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import repp.max.cloudcue.BaseViewModel
+import repp.max.cloudcue.domain.GetWeatherDetailsUseCase
 import repp.max.cloudcue.screens.city_details.model.CityDetailsAction
-import repp.max.cloudcue.screens.city_details.model.CityDetailsState
-import repp.max.cloudcue.screens.city_details.model.CityDetailsState.*
+import repp.max.cloudcue.screens.city_details.model.DetailsState
+import repp.max.cloudcue.screens.city_details.model.DetailsState.*
 import repp.max.cloudcue.screens.city_details.model.CityDetailsViewEvent
-import kotlin.random.Random
 
 
 class CityDetailsViewModel @AssistedInject constructor(
-    @Assisted city: String
+    @Assisted cityName: String,
+    private val getWeatherDetailsUseCase: GetWeatherDetailsUseCase
 ) :
-    BaseViewModel<CityDetailsState, CityDetailsAction, CityDetailsViewEvent>(InitState) {
+    BaseViewModel<DetailsState, CityDetailsAction, CityDetailsViewEvent>(InitState) {
 
     @AssistedFactory
     interface AssistedViewModelFactory {
-        fun create(city: String) : CityDetailsViewModel
+        fun create(city: String): CityDetailsViewModel
     }
+
     companion object {
         fun factory(
             factory: AssistedViewModelFactory,
@@ -39,12 +45,10 @@ class CityDetailsViewModel @AssistedInject constructor(
     }
 
     init {
-        updateState(
-            CityWeatherState(
-                Random.nextInt(-60, 50),
-                city
-            )
-        )
+        getWeatherDetailsUseCase.invoke(cityName)
+            .onEach { updateState(DetailsLoadedState(it)) }
+            .catch { sendAction(CityDetailsAction.Exit) }
+            .launchIn(viewModelScope)
     }
 
     override fun processViewEvent(event: CityDetailsViewEvent) {

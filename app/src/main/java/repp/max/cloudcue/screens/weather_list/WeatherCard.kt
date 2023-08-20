@@ -47,31 +47,38 @@ fun WeatherCard(weather: CityWeather) {
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Card(
-            Modifier.height(112.dp),
             colors = CardDefaults.cardColors(
                 containerColor = TransparentWhite
             )
         ) {
-            Row(Modifier.padding(vertical = 12.dp, horizontal = 12.dp)) {
-                Column(
-                    modifier = Modifier
-                        .weight(35f)
-                        .fillMaxHeight(),
-                    content = degreesColumn(weather)
-                )
-                Box(
-                    modifier = Modifier
-                        .width(1.5.dp)
-                        .align(Alignment.Bottom)
-                        .fillMaxHeight(0.6f)
-                        .background(Color(0x80FEFEFE))
-                )
-                Column(
-                    modifier = Modifier.weight(65f),
-                    content = locationColumn(weather)
-                )
-            }
+            WeatherCardContent(weather)
         }
+    }
+}
+
+@Composable
+fun WeatherCardContent(weather: CityWeather) {
+    Row(
+        Modifier
+            .padding(vertical = 12.dp, horizontal = 12.dp)
+            .height(112.dp)) {
+        Column(
+            modifier = Modifier
+                .weight(35f)
+                .fillMaxHeight(),
+            content = degreesColumn(weather)
+        )
+        Box(
+            modifier = Modifier
+                .width(1.5.dp)
+                .align(Alignment.Bottom)
+                .fillMaxHeight(0.6f)
+                .background(Color(0x80FEFEFE))
+        )
+        Column(
+            modifier = Modifier.weight(65f),
+            content = locationColumn(weather)
+        )
     }
 }
 

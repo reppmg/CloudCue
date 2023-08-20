@@ -1,4 +1,5 @@
 package repp.max.cloudcue.screens.city_details.model
 
- class CityDetailsAction {
+sealed class CityDetailsAction {
+  object Exit: CityDetailsAction()
 }

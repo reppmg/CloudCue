@@ -10,13 +10,13 @@ data class City(
     val name: String,
     val latitude: Double,
     val longitude: Double,
-    val timeZone: Long? //GMT shift
+    val gmtOffset: Long? //GMT shift
 ) {
     fun localTime() : String? {
-        timeZone ?: return null
+        gmtOffset ?: return null
         val format = SimpleDateFormat("HH:mm", Locale.UK)
-        format.timeZone = TimeZone.getTimeZone("GMT%+d".format(timeZone))
-        Timber.d("localTime: time zone: ${format.timeZone}; ${"GMT%+d".format(timeZone)}")
+        format.timeZone = TimeZone.getTimeZone("GMT%+d".format(gmtOffset))
+        Timber.d("localTime: time zone: ${format.timeZone}; ${"GMT%+d".format(gmtOffset)}")
         return format.format(Date())
     }
 }

@@ -4,15 +4,45 @@ import okio.IOException
 import repp.max.cloudcue.Constants
 import repp.max.cloudcue.api.CityTimeApi
 import repp.max.cloudcue.api.WeatherApi
+import repp.max.cloudcue.api.models.CityWeatherDetailsDto
+import repp.max.cloudcue.api.models.HourlyForecast
 import repp.max.cloudcue.models.City
 import repp.max.cloudcue.models.CityWeather
+import repp.max.cloudcue.models.CityWeatherDetails
+import repp.max.cloudcue.repository.util.DateUtils
+import repp.max.cloudcue.takeEach
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.coroutines.coroutineContext
 
 class CityWeatherRepository @Inject constructor(
     private val weatherApi: WeatherApi,
     private val cityTimeApi: CityTimeApi
 ) {
+    private val cache = LruCache<String, CityWeather>()
+
+    suspend fun loadDetails(cityName: String): CityWeatherDetails {
+        Timber.d("loadDetails: context: $coroutineContext")
+        val cityWeather = requireNotNull(cache[cityName] ?: loadWeather(cityName))
+        val city = cityWeather.city
+        val details = weatherApi.getDetails(city.latitude, city.longitude)
+        val hourly = details.list.take(24)
+        val daily = filter12pmForecasts(details, city.gmtOffset)
+        return CityWeatherDetails(
+            cityWeather,
+            hourly,
+            daily
+        )
+    }
+
+    private fun filter12pmForecasts(
+        details: CityWeatherDetailsDto,
+        gmtOffset: Long?
+    ): List<HourlyForecast> {
+        val tomorrowNoon = DateUtils.nextDay12pmDate(gmtOffset ?: 0).time
+        return details.list.dropWhile { it.timestamp < tomorrowNoon }.takeEach(8)
+    }
+
 
     suspend fun loadWeather(cityName: String): CityWeather {
         val city = fetchCity(cityName)
