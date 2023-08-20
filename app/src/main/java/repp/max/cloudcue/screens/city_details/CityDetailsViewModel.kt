@@ -6,14 +6,11 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import dagger.hilt.android.lifecycle.HiltViewModel
 import repp.max.cloudcue.BaseViewModel
 import repp.max.cloudcue.screens.city_details.model.CityDetailsAction
 import repp.max.cloudcue.screens.city_details.model.CityDetailsState
 import repp.max.cloudcue.screens.city_details.model.CityDetailsState.*
 import repp.max.cloudcue.screens.city_details.model.CityDetailsViewEvent
-import timber.log.Timber
-import javax.inject.Inject
 import kotlin.random.Random
 
 

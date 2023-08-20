@@ -7,7 +7,7 @@ import repp.max.cloudcue.BaseViewModel
 import repp.max.cloudcue.screens.weather_list.models.WeatherListAction
 import repp.max.cloudcue.screens.weather_list.models.WeatherListState
 import repp.max.cloudcue.screens.weather_list.models.WeatherListViewEvent
-import repp.max.cloudcue.service.GetWeatherListUseCase
+import repp.max.cloudcue.domain.GetWeatherListUseCase
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -18,8 +18,9 @@ class CityWeatherListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getWeatherListUseCase.getList().collect {
-                updateState(WeatherListState.WeatherList(it))
+            getWeatherListUseCase().collect {
+                Timber.d("weather: $it")
+                updateState(WeatherListState.WeatherList(it.map { "${it?.name}:${it?.main?.temp}" }))
             }
         }
     }

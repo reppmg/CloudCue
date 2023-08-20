@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1082997061876",
+    "project_id": "cloudcue-26074",
+    "storage_bucket": "cloudcue-26074.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1082997061876:android:fd8af93fc2db461d2b06a1",
+        "android_client_info": {
+          "package_name": "repp.max.cloudcue"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1082997061876-uflgq57r4pok02ua9b2ne4bcrru49vqr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACx4Y8VBsSFTShM5s3z8htDHsogzX4tvM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1082997061876-uflgq57r4pok02ua9b2ne4bcrru49vqr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
