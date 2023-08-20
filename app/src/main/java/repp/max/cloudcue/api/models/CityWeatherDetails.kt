@@ -5,21 +5,20 @@ import com.google.gson.annotations.SerializedName
 data class CityWeatherDetailsDto (
     @SerializedName("cnt")
     val count: Long,
-    val list: List<HourlyForecast>,
+    val list: List<HourlyForecastDto>,
 )
 
-data class HourlyForecast (
+data class HourlyForecastDto (
     @SerializedName("dt")
     val timestamp: Long,
-    val main: Main,
-    val weather: List<Condition>,
-    val clouds: Clouds? = null,
-    val wind: Wind? = null,
+    val main: MainDto,
+    val weather: List<ConditionDto>,
+    val clouds: CloudsDto? = null,
+    val wind: WindDto? = null,
     val visibility: Long? = null,
     @SerializedName("pop")
     val probabilityOfPrecipitation: Double? = null,
-    val rain: Rain? = null,
-    val sys: Sys? = null,
+    val rain: RainDto? = null,
 
     @SerializedName("dt_txt")
     val dtTxt: String? = null

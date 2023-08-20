@@ -1,9 +1,27 @@
 package repp.max.cloudcue.models
 
-import repp.max.cloudcue.api.models.HourlyForecast
 
-data class CityWeatherDetails (
+typealias DailyForecast = HourlyForecast
+
+data class CityWeatherDetails(
     val cityWeather: CityWeather,
     val hourly: List<HourlyForecast>,
-    val daily: List<HourlyForecast> //3 days forward at 12pm
+    val daily: List<DailyForecast> //3 days forward at 12pm
+)
+
+data class HourlyForecast(
+    val timestamp: Long,
+    val temperature: Temperature,
+    val condition: Condition
+)
+
+data class Temperature(
+    val current: Int,
+    val min: Int,
+    val max: Int
+)
+
+data class Condition(
+    val name: String,
+    val imageUrl: String
 )

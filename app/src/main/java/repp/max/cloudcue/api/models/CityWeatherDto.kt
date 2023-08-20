@@ -6,13 +6,13 @@ import com.google.gson.annotations.SerializedName
 data class CityWeatherDto (
     val coord: Coord? = null,
     @SerializedName("weather")
-    val condition: List<Condition>? = null,
+    val condition: List<ConditionDto>? = null,
     val base: String? = null,
-    val main: Main? = null,
+    val main: MainDto? = null,
     val visibility: Long? = null,
-    val wind: Wind? = null,
-    val rain: Rain? = null,
-    val clouds: Clouds? = null,
+    val wind: WindDto? = null,
+    val rain: RainDto? = null,
+    val clouds: CloudsDto? = null,
     val dt: Long? = null,
     val sys: Sys? = null,
     val timezone: Long? = null,
@@ -21,7 +21,7 @@ data class CityWeatherDto (
     val cod: Long? = null
 )
 
-data class Clouds (
+data class CloudsDto (
     val all: Long? = null
 )
 
@@ -30,7 +30,7 @@ data class Coord (
     val lat: Double? = null
 )
 
-data class Main (
+data class MainDto (
     val temp: Double? = null,
 
     @SerializedName("feels_like")
@@ -52,7 +52,7 @@ data class Main (
     val grndLevel: Long? = null
 )
 
-data class Rain (
+data class RainDto (
     @SerializedName("1h")
     val the1H: Double? = null
 )
@@ -65,14 +65,14 @@ data class Sys (
     val sunset: Long? = null
 )
 
-data class Condition (
+data class ConditionDto (
     val id: Int? = null,
     val main: String? = null,
     val description: String? = null,
     val icon: String? = null
 )
 
-data class Wind (
+data class WindDto (
     val speed: Double? = null,
     val deg: Long? = null,
     val gust: Double? = null

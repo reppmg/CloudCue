@@ -61,7 +61,8 @@ fun WeatherCardContent(weather: CityWeather) {
     Row(
         Modifier
             .padding(vertical = 12.dp, horizontal = 12.dp)
-            .height(112.dp)) {
+            .height(112.dp)
+    ) {
         Column(
             modifier = Modifier
                 .weight(35f)
@@ -99,8 +100,7 @@ private fun degreesColumn(weather: CityWeather): @Composable() (ColumnScope.() -
             Text(
                 text = "${weather.currentTemp.toInt()}ºC",
                 modifier = Modifier,
-
-                style = TextStyle(fontSize = 42.sp)
+                fontSize = 42.sp
             )
         }
     }
@@ -140,10 +140,8 @@ private fun locationColumn(weather: CityWeather): @Composable() (ColumnScope.() 
                 .padding(start = 12.dp),
             verticalArrangement = Arrangement.Bottom
         ) {
-            weather.conditionName?.let { condition ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    ConditionRow(condition, weather.conditionImageUrl)
-                }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ConditionRow(weather.condition.name, weather.condition.imageUrl)
             }
             weather.city.localTime()?.let { localTime ->
                 LocalTimeRow(localTime)
@@ -152,16 +150,14 @@ private fun locationColumn(weather: CityWeather): @Composable() (ColumnScope.() 
     }
 
 @Composable
-private fun ConditionRow(condition: String, url: String?) {
-    url?.let { imageUrl ->
-        GlideImage(
-            imageModel = { imageUrl },
-            modifier = Modifier.size(26.dp),
-            imageOptions = ImageOptions(
-                contentScale = ContentScale.Inside
-            )
+private fun ConditionRow(condition: String, imageUrl: String) {
+    GlideImage(
+        imageModel = { imageUrl },
+        modifier = Modifier.size(26.dp),
+        imageOptions = ImageOptions(
+            contentScale = ContentScale.Inside
         )
-    } ?: Box(modifier = Modifier.size(24.dp))
+    )
     Spacer(modifier = Modifier.width(6.dp))
     Text(text = condition, fontSize = 16.sp)
 }
@@ -179,22 +175,5 @@ private fun LocalTimeRow(localTime: String) {
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(text = localTime, fontSize = 16.sp, modifier = Modifier.padding(start = 2.dp))
-    }
-}
-
-@Preview
-@Composable
-fun ListPreview() {
-    CloudCueTheme {
-        WeatherList(
-            {}, listOf(
-                CityWeather(
-                    City("London", 0.0, 0.0, 1),
-                    23.0,
-                    "scattered clouds",
-                    "http://openweathermap.org/img/wn/50d@2x.png"
-                ),
-            )
-        )
     }
 }
