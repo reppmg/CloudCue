@@ -135,35 +135,45 @@ private fun locationColumn(weather: CityWeather): @Composable() (ColumnScope.() 
         ) {
             weather.conditionName?.let { condition ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    weather.conditionImageUrl?.let { imageUrl ->
-                        GlideImage(
-                            imageModel = { imageUrl },
-                            modifier = Modifier.size(26.dp),
-                            imageOptions = ImageOptions(
-                                contentScale = ContentScale.Inside
-                            )
-                        )
-                    } ?: Box(modifier = Modifier.size(24.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = condition, fontSize = 16.sp)
+                    ConditionRow(condition, weather.conditionImageUrl)
                 }
             }
             weather.city.localTime()?.let { localTime ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(start = 2.dp)
-                ) {
-                    Icon(
-                        Icons.Outlined.AccessTime,
-                        contentDescription = "accessTime",
-                        Modifier.size(22.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = localTime, fontSize = 16.sp)
-                }
+                LocalTimeRow(localTime)
             }
         }
     }
+
+@Composable
+private fun ConditionRow(condition: String, url: String?) {
+    url?.let { imageUrl ->
+        GlideImage(
+            imageModel = { imageUrl },
+            modifier = Modifier.size(26.dp),
+            imageOptions = ImageOptions(
+                contentScale = ContentScale.Inside
+            )
+        )
+    } ?: Box(modifier = Modifier.size(24.dp))
+    Spacer(modifier = Modifier.width(6.dp))
+    Text(text = condition, fontSize = 16.sp)
+}
+
+@Composable
+private fun LocalTimeRow(localTime: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(start = 2.dp)
+    ) {
+        Icon(
+            Icons.Outlined.AccessTime,
+            contentDescription = "accessTime",
+            Modifier.size(22.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(text = localTime, fontSize = 16.sp, modifier = Modifier.padding(start = 2.dp))
+    }
+}
 
 @Preview
 @Composable
