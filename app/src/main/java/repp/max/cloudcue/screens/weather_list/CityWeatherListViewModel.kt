@@ -30,7 +30,7 @@ class CityWeatherListViewModel @Inject constructor(
     override fun processViewEvent(event: WeatherListViewEvent) {
         when (event) {
             is WeatherListViewEvent.OnItemClicked ->
-                sendAction(WeatherListAction.NavigateDetails(event.city))
+                sendAction(WeatherListAction.NavigateDetails(event.city.cityName))
         }
     }
 }

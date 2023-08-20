@@ -27,11 +27,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.launch
+import repp.max.cloudcue.models.CityWeather
 import repp.max.cloudcue.navigation.Screens
 import repp.max.cloudcue.screens.weather_list.models.WeatherListAction
 import repp.max.cloudcue.screens.weather_list.models.WeatherListState
@@ -96,7 +97,11 @@ fun CityWeatherListScreen(
         with(state) {
             when (this) {
                 is WeatherListState.Loading -> Progress()
-                is WeatherListState.WeatherList -> WeatherList(navController, viewModel, weathers)
+                is WeatherListState.WeatherList -> WeatherList({
+                    viewModel.apply(
+                        WeatherListViewEvent.OnItemClicked(it)
+                    )
+                }, weathers)
             }
         }
     }
@@ -120,22 +125,21 @@ fun PermissionRationale(
     }
 }
 
+
+
 @Composable
 fun WeatherList(
-    navController: NavHostController, viewModel: CityWeatherListViewModel, list: List<String>
+    onItemClicked: (CityWeather) -> Unit, list: List<String>
 ) {
     LazyColumn {
-        items(list) { weather ->
-            Text(text = "weather for $weather", modifier = Modifier.clickable {
-                viewModel.apply(
-                    WeatherListViewEvent.OnItemClicked(
-                        weather
-                    )
-                )
-            })
+        items(list) {
+            WeatherCard(
+                weather = CityWeather("lol", 12.0),
+            )
         }
     }
 }
+
 
 @Composable
 fun Progress() {
