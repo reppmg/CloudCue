@@ -11,6 +11,8 @@ import repp.max.cloudcue.domain.GetWeatherListUseCase
 import timber.log.Timber
 import javax.inject.Inject
 
+const val KEY_PERMISSION_ATTEMPTS = "permission_attempts"
+
 @HiltViewModel
 class CityWeatherListViewModel @Inject constructor(
     private val getWeatherListUseCase: GetWeatherListUseCase
@@ -20,16 +22,16 @@ class CityWeatherListViewModel @Inject constructor(
         viewModelScope.launch {
             getWeatherListUseCase().collect {
                 Timber.d("weather: $it")
-                updateState(WeatherListState.WeatherList(it.map{it ?: ""}.map(Any::toString)))
+                updateState(WeatherListState.WeatherList(it.map { it ?: "" }.map(Any::toString)))
             }
         }
     }
 
     override fun processViewEvent(event: WeatherListViewEvent) {
         when (event) {
-            is WeatherListViewEvent.OnItemClicked -> {
+            is WeatherListViewEvent.OnItemClicked ->
                 sendAction(WeatherListAction.NavigateDetails(event.city))
-            }
         }
     }
 }
+

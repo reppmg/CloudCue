@@ -19,7 +19,7 @@ fun Navigation() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screens.CityWeatherList.route) {
         composable(Screens.CityWeatherList.route) {
-            CityWeatherListScreen(navController, hiltViewModel())
+            CityWeatherListScreen(navController, hiltViewModel(), hiltViewModel())
         }
         composable(
             Screens.CityWeatherDetails.route,

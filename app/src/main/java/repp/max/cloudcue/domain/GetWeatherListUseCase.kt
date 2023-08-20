@@ -2,8 +2,7 @@ package repp.max.cloudcue.domain
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import repp.max.cloudcue.Constants
-import repp.max.cloudcue.api.models.CityWeatherDto
+import repp.max.cloudcue.Config
 import repp.max.cloudcue.models.CityWeather
 import repp.max.cloudcue.repository.CityWeatherRepository
 import timber.log.Timber
@@ -13,7 +12,7 @@ class GetWeatherListUseCase @Inject constructor(
     private val repository: CityWeatherRepository
 ) {
     suspend operator fun invoke(): Flow<List<CityWeather?>> = flow {
-        val value = Constants.citiesList.map {
+        val value = Config.citiesList.map {
             try {
                 repository.loadWeather(it)
             } catch (e: Exception) {

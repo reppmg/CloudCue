@@ -6,7 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import repp.max.cloudcue.Constants
+import repp.max.cloudcue.Config
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -22,7 +22,7 @@ class ApiModule {
         return OkHttpClient.Builder()
             .addInterceptor(ApiKeyInterceptor())
             .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
+                level = HttpLoggingInterceptor.Level.BASIC
             })
             .build()
     }
@@ -32,7 +32,7 @@ class ApiModule {
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .client(okHttpClient)
-            .baseUrl(Constants.baseUrl)
+            .baseUrl(Config.baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

@@ -10,12 +10,12 @@ plugins {
 
 android {
     namespace = "repp.max.cloudcue"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "repp.max.cloudcue"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -74,6 +74,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
 
+    implementation("com.google.accompanist:accompanist-permissions:0.33.0-alpha")
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
