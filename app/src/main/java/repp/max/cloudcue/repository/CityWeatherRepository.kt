@@ -1,7 +1,8 @@
 package repp.max.cloudcue.repository
 
 import repp.max.cloudcue.api.WeatherApi
-import repp.max.cloudcue.api.models.CityWeather
+import repp.max.cloudcue.api.models.CityWeatherDto
+import repp.max.cloudcue.models.CityWeather
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -15,6 +16,9 @@ class CityWeatherRepository @Inject constructor(
         Timber.d("loadWeather: $cityLocation")
         requireNotNull(cityLocation.lat)
         requireNotNull(cityLocation.lon)
-        return api.getWeatherForPosition(cityLocation.lat, cityLocation.lon)
+        val weatherDto = api.getWeatherForPosition(cityLocation.lat, cityLocation.lon)
+        val temp = weatherDto.main?.temp
+        requireNotNull(temp)
+        return CityWeather(city, temp)
     }
 }

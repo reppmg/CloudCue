@@ -20,7 +20,7 @@ class CityWeatherListViewModel @Inject constructor(
         viewModelScope.launch {
             getWeatherListUseCase().collect {
                 Timber.d("weather: $it")
-                updateState(WeatherListState.WeatherList(it.map { "${it?.name}:${it?.main?.temp}" }))
+                updateState(WeatherListState.WeatherList(it.map{it ?: ""}.map(Any::toString)))
             }
         }
     }

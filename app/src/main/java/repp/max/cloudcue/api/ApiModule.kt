@@ -22,7 +22,7 @@ class ApiModule {
         return OkHttpClient.Builder()
             .addInterceptor(ApiKeyInterceptor())
             .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BASIC
+                level = HttpLoggingInterceptor.Level.BODY
             })
             .build()
     }

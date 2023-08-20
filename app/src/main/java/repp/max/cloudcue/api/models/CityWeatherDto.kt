@@ -3,7 +3,7 @@ package repp.max.cloudcue.api.models
 import com.google.gson.annotations.SerializedName
 
 
-data class CityWeather (
+data class CityWeatherDto (
     val coord: Coord? = null,
     val weather: List<Weather>? = null,
     val base: String? = null,
