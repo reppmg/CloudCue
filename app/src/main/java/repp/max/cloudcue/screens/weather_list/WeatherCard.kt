@@ -35,6 +35,7 @@ import com.skydoves.landscapist.glide.GlideImage
 import repp.max.cloudcue.models.City
 import repp.max.cloudcue.models.CityWeather
 import repp.max.cloudcue.ui.theme.CloudCueTheme
+import repp.max.cloudcue.ui.theme.TransparentWhite
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -48,7 +49,7 @@ fun WeatherCard(weather: CityWeather) {
         Card(
             Modifier.height(112.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Color(0x80000000)
+                containerColor = TransparentWhite
             )
         ) {
             Row(Modifier.padding(vertical = 12.dp, horizontal = 12.dp)) {
@@ -63,7 +64,7 @@ fun WeatherCard(weather: CityWeather) {
                         .width(1.5.dp)
                         .align(Alignment.Bottom)
                         .fillMaxHeight(0.6f)
-                        .background(Color(0xAAfefefe))
+                        .background(Color(0x80FEFEFE))
                 )
                 Column(
                     modifier = Modifier.weight(65f),
@@ -107,7 +108,7 @@ private fun locationColumn(weather: CityWeather): @Composable() (ColumnScope.() 
         ) {
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xAA808080)
+                    containerColor = TransparentWhite
                 ),
                 modifier = Modifier
             ) {

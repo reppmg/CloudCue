@@ -24,7 +24,7 @@ class ApiModule {
     @Provides
     @Singleton
     fun provideTimeApiService(): CityTimeApi {
-        val retrofit = createRetrofit("api_key", Config.gmtApiKey, Config.gmtBaseUrl)
+        val retrofit = createRetrofit("key", Config.gmtApiKey, Config.gmtBaseUrl)
         return retrofit.create(CityTimeApi::class.java)
     }
 

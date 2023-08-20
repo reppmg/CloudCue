@@ -7,8 +7,9 @@ import retrofit2.http.Query
 interface CityTimeApi {
 
 
-    @GET("https://timezone.abstractapi.com/v1/current_time/")
+    @GET("get-time-zone?format=json&by=position")
     suspend fun fetchGmt(
-        @Query("location") cityName: String
+        @Query("lat") latitude: Double,
+        @Query("lng") longitude: Double
     ): CityTimeDto
 }

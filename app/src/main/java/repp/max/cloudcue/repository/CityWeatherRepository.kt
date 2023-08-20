@@ -35,7 +35,7 @@ class CityWeatherRepository @Inject constructor(
         requireNotNull(cityLocation.lat)
         requireNotNull(cityLocation.lon)
         val cityGmt = try {
-            cityTimeApi.fetchGmt(cityName)
+            cityTimeApi.fetchGmt(cityLocation.lat, cityLocation.lon)
         } catch (e: IOException) {
             Timber.w(e, "Error loading city time")
             null
@@ -44,7 +44,7 @@ class CityWeatherRepository @Inject constructor(
             cityName,
             cityLocation.lat,
             cityLocation.lon,
-            cityGmt?.gmtOffset
+            cityGmt?.gmtOffsetHours
         )
     }
 
