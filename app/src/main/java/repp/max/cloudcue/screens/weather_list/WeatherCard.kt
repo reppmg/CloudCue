@@ -12,9 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,10 +25,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.glide.GlideImage
+import repp.max.cloudcue.models.City
 import repp.max.cloudcue.models.CityWeather
 import repp.max.cloudcue.ui.theme.CloudCueTheme
 import java.text.SimpleDateFormat
@@ -43,21 +48,22 @@ fun WeatherCard(weather: CityWeather) {
         Card(
             Modifier.height(112.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Color(237f / 256f, 153f / 256f, 63f / 256f)
+                containerColor = Color(0x80000000)
             )
         ) {
-            Row(Modifier.padding(vertical = 12.dp, horizontal = 12.dp)){
+            Row(Modifier.padding(vertical = 12.dp, horizontal = 12.dp)) {
                 Column(
                     modifier = Modifier
                         .weight(35f)
                         .fillMaxHeight(),
                     content = degreesColumn(weather)
                 )
-                Box(modifier = Modifier
-                    .width(1.5.dp)
-                    .align(Alignment.Bottom)
-                    .fillMaxHeight(0.6f)
-                    .background(Color(0xAAfefefe))
+                Box(
+                    modifier = Modifier
+                        .width(1.5.dp)
+                        .align(Alignment.Bottom)
+                        .fillMaxHeight(0.6f)
+                        .background(Color(0xAAfefefe))
                 )
                 Column(
                     modifier = Modifier.weight(65f),
@@ -109,13 +115,12 @@ private fun locationColumn(weather: CityWeather): @Composable() (ColumnScope.() 
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
-                    Icon(
-                        Icons.Outlined.LocationOn,
-                        "location"
-                    )
+                    Icon(Icons.Outlined.LocationOn, "location", modifier = Modifier.size(22.dp))
                     Text(
-                        text = "Berlin", modifier = Modifier
-                            .padding(end = 8.dp, start = 4.dp)
+                        text = weather.city.name,
+                        modifier = Modifier
+                            .padding(end = 8.dp, start = 4.dp),
+                        fontSize = 14.sp
                     )
 
                 }
@@ -127,15 +132,34 @@ private fun locationColumn(weather: CityWeather): @Composable() (ColumnScope.() 
                 .padding(start = 12.dp),
             verticalArrangement = Arrangement.Bottom
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.Info, contentDescription = "cloud")
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(text = "cloudy")
+            weather.conditionName?.let { condition ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    weather.conditionImageUrl?.let { imageUrl ->
+                        GlideImage(
+                            imageModel = { imageUrl },
+                            modifier = Modifier.size(26.dp),
+                            imageOptions = ImageOptions(
+                                contentScale = ContentScale.Inside
+                            )
+                        )
+                    } ?: Box(modifier = Modifier.size(24.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(text = condition, fontSize = 16.sp)
+                }
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.Info, contentDescription = "cloud")
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(text = "16:35")
+            weather.city.localTime()?.let { localTime ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(start = 2.dp)
+                ) {
+                    Icon(
+                        Icons.Outlined.AccessTime,
+                        contentDescription = "accessTime",
+                        Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(text = localTime, fontSize = 16.sp)
+                }
             }
         }
     }
@@ -144,6 +168,15 @@ private fun locationColumn(weather: CityWeather): @Composable() (ColumnScope.() 
 @Composable
 fun ListPreview() {
     CloudCueTheme {
-        WeatherList({}, listOf("", "", ""))
+        WeatherList(
+            {}, listOf(
+                CityWeather(
+                    City("London", 0.0, 0.0, 1),
+                    23.0,
+                    "scattered clouds",
+                    "http://openweathermap.org/img/wn/50d@2x.png"
+                ),
+            )
+        )
     }
 }

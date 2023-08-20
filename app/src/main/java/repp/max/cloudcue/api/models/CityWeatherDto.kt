@@ -5,7 +5,8 @@ import com.google.gson.annotations.SerializedName
 
 data class CityWeatherDto (
     val coord: Coord? = null,
-    val weather: List<Weather>? = null,
+    @SerializedName("weather")
+    val condition: List<Condition>? = null,
     val base: String? = null,
     val main: Main? = null,
     val visibility: Long? = null,
@@ -64,8 +65,8 @@ data class Sys (
     val sunset: Long? = null
 )
 
-data class Weather (
-    val id: Long? = null,
+data class Condition (
+    val id: Int? = null,
     val main: String? = null,
     val description: String? = null,
     val icon: String? = null

@@ -126,16 +126,17 @@ fun PermissionRationale(
 }
 
 
-
 @Composable
 fun WeatherList(
-    onItemClicked: (CityWeather) -> Unit, list: List<String>
+    onItemClicked: (CityWeather) -> Unit, list: List<CityWeather>
 ) {
     LazyColumn {
         items(list) {
-            WeatherCard(
-                weather = CityWeather("lol", 12.0),
-            )
+            Box(Modifier.clickable { onItemClicked(it) }) {
+                WeatherCard(
+                    weather = it,
+                )
+            }
         }
     }
 }

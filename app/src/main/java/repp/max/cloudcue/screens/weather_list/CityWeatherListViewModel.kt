@@ -22,7 +22,7 @@ class CityWeatherListViewModel @Inject constructor(
         viewModelScope.launch {
             getWeatherListUseCase().collect {
                 Timber.d("weather: $it")
-                updateState(WeatherListState.WeatherList(it.map { it ?: "" }.map(Any::toString)))
+                updateState(WeatherListState.WeatherList(it.filterNotNull()))
             }
         }
     }
@@ -30,7 +30,7 @@ class CityWeatherListViewModel @Inject constructor(
     override fun processViewEvent(event: WeatherListViewEvent) {
         when (event) {
             is WeatherListViewEvent.OnItemClicked ->
-                sendAction(WeatherListAction.NavigateDetails(event.city.cityName))
+                sendAction(WeatherListAction.NavigateDetails(event.cityWeather.city.name))
         }
     }
 }

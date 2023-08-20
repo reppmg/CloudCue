@@ -14,32 +14,31 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class ApiModule {
-
+    @Provides
+    @Singleton
+    fun provideWeatherApiService(): WeatherApi {
+        val retrofit = createRetrofit("appid", Config.weatherApiKey, Config.weatherBaseUrl)
+        return retrofit.create(WeatherApi::class.java)
+    }
 
     @Provides
     @Singleton
-    fun provideOkhttp(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .addInterceptor(ApiKeyInterceptor())
+    fun provideTimeApiService(): CityTimeApi {
+        val retrofit = createRetrofit("api_key", Config.gmtApiKey, Config.gmtBaseUrl)
+        return retrofit.create(CityTimeApi::class.java)
+    }
+
+    private fun createRetrofit(apiKeyQueryName: String, apiKey: String, baseUrl: String): Retrofit {
+        val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(ApiKeyInterceptor(apiKeyQueryName, apiKey))
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BASIC
             })
             .build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .client(okHttpClient)
-            .baseUrl(Config.baseUrl)
+            .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideYourApiService(retrofit: Retrofit): WeatherApi {
-        return retrofit.create(WeatherApi::class.java)
     }
 }
