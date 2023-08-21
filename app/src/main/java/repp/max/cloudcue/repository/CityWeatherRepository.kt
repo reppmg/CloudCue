@@ -1,33 +1,36 @@
 package repp.max.cloudcue.repository
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import okio.IOException
 import repp.max.cloudcue.Constants
 import repp.max.cloudcue.api.CityTimeApi
 import repp.max.cloudcue.api.WeatherApi
+import repp.max.cloudcue.api.models.CityTimeDto
 import repp.max.cloudcue.api.models.CityWeatherDetailsDto
 import repp.max.cloudcue.api.models.HourlyForecastDto
 import repp.max.cloudcue.models.City
 import repp.max.cloudcue.models.CityWeather
 import repp.max.cloudcue.models.CityWeatherDetails
-import repp.max.cloudcue.models.DailyForecast
-import repp.max.cloudcue.models.HourlyForecast
-import repp.max.cloudcue.models.Temperature
+import repp.max.cloudcue.models.Location
 import repp.max.cloudcue.repository.util.DateUtils
 import repp.max.cloudcue.takeEach
 import timber.log.Timber
 import javax.inject.Inject
-import kotlin.coroutines.coroutineContext
+import javax.inject.Singleton
 
+@Singleton
 class CityWeatherRepository @Inject constructor(
     private val weatherApi: WeatherApi,
     private val cityTimeApi: CityTimeApi
 ) {
-    private val cache = LruCache<String, CityWeather>()
+    private val _weathersFlow = MutableStateFlow<List<CityWeather>>(listOf())
+    val weathersFlow: StateFlow<List<CityWeather>> = _weathersFlow
 
     suspend fun loadDetails(cityName: String): CityWeatherDetails {
-        val cityWeather = requireNotNull(cache[cityName] ?: loadWeather(cityName))
+        val cityWeather = loadWeather(cityName)
         val city = cityWeather.city
-        val details = weatherApi.getDetails(city.latitude, city.longitude)
+        val details = weatherApi.getDetails(city.location.latitude, city.location.longitude)
         val hourly = details.list.take(8).map(HourlyForecastDto::toModel)
         val daily = filterForecastFromTomorrow(details, city.gmtOffset)
             .chunked(8)
@@ -56,19 +59,28 @@ class CityWeatherRepository @Inject constructor(
         return details.list.dropWhile { it.timestamp < tomorrowMidnight }
     }
 
-    private fun filter12pmForecasts(
-        details: CityWeatherDetailsDto,
-        gmtOffset: Long?
-    ): List<HourlyForecastDto> {
-        val tomorrowNoon = DateUtils.nextDay12pmDate(gmtOffset ?: 0).time / 1000
-        return details.list.dropWhile { it.timestamp < tomorrowNoon }.takeEach(8)
+    suspend fun loadWeather(location: Location): CityWeather {
+        val city = weathersFlow.value
+            .find { it.city.location.isSameCity(location) }?.city ?: fetchCity(location)
+
+        return loadWeatherForCity(city)
     }
 
-
     suspend fun loadWeather(cityName: String): CityWeather {
-        val city = fetchCity(cityName)
+        Timber.d("loadWeather: ")
+        val city = weathersFlow.value
+            .find { it.city.name == cityName }?.city ?: fetchCity(cityName)
 
-        val weatherDto = weatherApi.getWeatherForPosition(city.latitude, city.longitude)
+        val loadWeatherForCity = loadWeatherForCity(city)
+        Timber.d("loadWeather: end")
+        return loadWeatherForCity
+    }
+
+    private suspend fun loadWeatherForCity(
+        city: City
+    ): CityWeather {
+        val weatherDto =
+            weatherApi.getWeatherForPosition(city.location.latitude, city.location.longitude)
 
         val condition = requireNotNull(weatherDto.condition).first()
 
@@ -77,8 +89,18 @@ class CityWeatherRepository @Inject constructor(
             requireNotNull(weatherDto.main?.temp) + Constants.kelvinZero,
             condition.toModel()
         )
-        cache[cityName] = cityWeather
+        val currentList = _weathersFlow.value
+        val newList = currentList.filter { it.city.name != city.name }.plus(cityWeather)
+        _weathersFlow.emit(newList)
+        Timber.d("loadWeatherForCity:  emitted a new list in $_weathersFlow")
         return cityWeather
+    }
+
+    private suspend fun fetchCity(location: Location): City {
+        val cityLocationDto =
+            weatherApi.decodeCity(location.latitude, location.longitude).firstOrNull()
+        val gmtOffset = fetchCityTime(location)?.gmtOffsetHours
+        return requireNotNull(cityLocationDto?.toCity(gmtOffset))
     }
 
     private suspend fun fetchCity(cityName: String): City {
@@ -86,18 +108,26 @@ class CityWeatherRepository @Inject constructor(
         Timber.d("loadWeather: $cityLocation")
         requireNotNull(cityLocation.lat)
         requireNotNull(cityLocation.lon)
+        val location = Location(
+            cityLocation.lat,
+            cityLocation.lon,
+        )
+        val cityGmt = fetchCityTime(location)
+        return City(
+            cityName,
+            location,
+            cityGmt?.gmtOffsetHours
+        )
+    }
+
+    private suspend fun fetchCityTime(location: Location): CityTimeDto? {
         val cityGmt = try {
-            cityTimeApi.fetchGmt(cityLocation.lat, cityLocation.lon)
+            cityTimeApi.fetchGmt(location.latitude, location.longitude)
         } catch (e: IOException) {
             Timber.w(e, "Error loading city time")
             null
         }
-        return City(
-            cityName,
-            cityLocation.lat,
-            cityLocation.lon,
-            cityGmt?.gmtOffsetHours
-        )
+        return cityGmt
     }
 
 }

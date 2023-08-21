@@ -1,4 +1,4 @@
-package repp.max.cloudcue.storage
+package repp.max.cloudcue.di
 
 import android.content.Context
 import android.content.SharedPreferences

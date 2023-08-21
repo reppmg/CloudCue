@@ -1,10 +1,13 @@
 package repp.max.cloudcue.repository
 
 import repp.max.cloudcue.Constants
+import repp.max.cloudcue.api.models.CityLocationDto
 import repp.max.cloudcue.api.models.ConditionDto
 import repp.max.cloudcue.api.models.HourlyForecastDto
+import repp.max.cloudcue.models.City
 import repp.max.cloudcue.models.Condition
 import repp.max.cloudcue.models.HourlyForecast
+import repp.max.cloudcue.models.Location
 import repp.max.cloudcue.models.Temperature
 
 fun ConditionDto.toModel(): Condition {
@@ -14,7 +17,6 @@ fun ConditionDto.toModel(): Condition {
     )
 
 }
-
 fun HourlyForecastDto.toModel(): HourlyForecast {
     return HourlyForecast(
         this.timestamp,
@@ -24,6 +26,17 @@ fun HourlyForecastDto.toModel(): HourlyForecast {
             (requireNotNull(main.tempMax) + Constants.kelvinZero).toInt()
         ),
         weather.first().toModel()
+    )
+}
+
+fun CityLocationDto.toCity(gmtOffset: Long?): City {
+    return City(
+        requireNotNull(name),
+        Location(
+            requireNotNull(lat),
+            requireNotNull(lon)
+        ),
+        gmtOffset
     )
 }
 

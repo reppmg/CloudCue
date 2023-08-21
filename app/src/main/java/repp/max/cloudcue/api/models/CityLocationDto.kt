@@ -1,6 +1,6 @@
 package repp.max.cloudcue.api.models
 
-data class CityLocation (
+data class CityLocationDto (
     val name: String? = null,
     val lat: Double? = null,
     val lon: Double? = null,

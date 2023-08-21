@@ -1,4 +1,4 @@
-package repp.max.cloudcue.api
+package repp.max.cloudcue.di
 
 import dagger.Module
 import dagger.Provides
@@ -7,6 +7,9 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import repp.max.cloudcue.Config
+import repp.max.cloudcue.api.ApiKeyInterceptor
+import repp.max.cloudcue.api.CityTimeApi
+import repp.max.cloudcue.api.WeatherApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton

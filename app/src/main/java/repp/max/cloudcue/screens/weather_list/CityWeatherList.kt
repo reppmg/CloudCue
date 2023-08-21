@@ -2,28 +2,29 @@
 
 package repp.max.cloudcue.screens.weather_list
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.navigation.NavHostController
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavHostController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import repp.max.cloudcue.models.CityWeather
@@ -35,12 +36,7 @@ import repp.max.cloudcue.screens.weather_list.permission.PermissionViewModel
 import repp.max.cloudcue.screens.weather_list.permission.models.PermissionAction
 import repp.max.cloudcue.screens.weather_list.permission.models.PermissionEvent
 import repp.max.cloudcue.screens.weather_list.permission.models.PermissionState
-
-fun Context.getActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.getActivity()
-    else -> null
-}
+import timber.log.Timber
 
 @Composable
 fun CityWeatherListScreen(
@@ -51,6 +47,19 @@ fun CityWeatherListScreen(
     val context = LocalContext.current
     val androidPermissionState =
         rememberPermissionState(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = {
+            Timber.d("CityWeatherListScreen: $it ")
+            permissionViewModel.apply(
+                PermissionEvent.UpdatePermissionState(
+                    if (it) PermissionStatus.Granted else PermissionStatus.Denied(
+                        true
+                    )
+                )
+            )
+        }
+    )
     permissionViewModel.apply(PermissionEvent.UpdatePermissionState(androidPermissionState.status))
     LaunchedEffect(key1 = viewModel) {
         launch {
@@ -67,7 +76,8 @@ fun CityWeatherListScreen(
         launch {
             permissionViewModel.viewActions.collect { action ->
                 when (action) {
-                    PermissionAction.RequestPermission -> androidPermissionState.launchPermissionRequest()
+                    PermissionAction.RequestPermission -> permissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+//                        androidPermissionState.launchPermissionRequest()
                     PermissionAction.OpenSettingsPermission -> {
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                             val uri = Uri.fromParts("package", context.packageName, null)

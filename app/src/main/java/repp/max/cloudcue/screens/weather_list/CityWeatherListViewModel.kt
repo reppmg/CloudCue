@@ -2,6 +2,7 @@ package repp.max.cloudcue.screens.weather_list
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import repp.max.cloudcue.BaseViewModel
 import repp.max.cloudcue.screens.weather_list.models.WeatherListAction
@@ -19,8 +20,13 @@ class CityWeatherListViewModel @Inject constructor(
 ) : BaseViewModel<WeatherListState, WeatherListAction, WeatherListViewEvent>(WeatherListState.Loading) {
 
     init {
-        viewModelScope.launch {
-            getWeatherListUseCase().collect {
+        val handler = CoroutineExceptionHandler { _, throwable ->
+            Timber.e(throwable)
+        }
+        viewModelScope.launch(handler) {
+            getWeatherListUseCase().apply {
+                Timber.d("collecting $this: ")
+            }.collect {
                 Timber.d("weather: $it")
                 updateState(WeatherListState.WeatherList(it.filterNotNull()))
             }

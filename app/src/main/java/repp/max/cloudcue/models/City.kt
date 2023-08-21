@@ -8,8 +8,7 @@ import java.util.TimeZone
 
 data class City(
     val name: String,
-    val latitude: Double,
-    val longitude: Double,
+    val location: Location,
     val gmtOffset: Long? //GMT shift
 ) {
     fun localTime() : String? {

@@ -67,6 +67,7 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     implementation("com.google.dagger:hilt-android:2.44")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 

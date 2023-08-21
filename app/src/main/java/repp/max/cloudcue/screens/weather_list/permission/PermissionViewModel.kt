@@ -3,11 +3,14 @@ package repp.max.cloudcue.screens.weather_list.permission
 import android.content.SharedPreferences
 import android.os.Build
 import androidx.core.content.edit
+import androidx.lifecycle.viewModelScope
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import repp.max.cloudcue.BaseViewModel
 import repp.max.cloudcue.Constants
+import repp.max.cloudcue.domain.RequestLocationUseCase
 import repp.max.cloudcue.screens.weather_list.KEY_PERMISSION_ATTEMPTS
 import repp.max.cloudcue.screens.weather_list.permission.models.PermissionAction
 import repp.max.cloudcue.screens.weather_list.permission.models.PermissionEvent
@@ -19,9 +22,9 @@ import javax.inject.Inject
 @OptIn(ExperimentalPermissionsApi::class)
 @HiltViewModel
 class PermissionViewModel @Inject constructor(
-    private val storage: SharedPreferences
-) :
-    BaseViewModel<PermissionState, PermissionAction, PermissionEvent>(Undefined) {
+    private val storage: SharedPreferences,
+    private val requestLocationUseCase: RequestLocationUseCase
+) : BaseViewModel<PermissionState, PermissionAction, PermissionEvent>(Undefined) {
 
     override fun processViewEvent(event: PermissionEvent) {
         when (event) {
@@ -34,12 +37,27 @@ class PermissionViewModel @Inject constructor(
 
                 when (event.status) {
                     is PermissionStatus.Denied -> if (attemptsMade < Constants.showPermissionAttempts) {
-                        updateState(Denied())
-                        requestPermission()
+                        if (state.value !is Denied)
+                            requestPermission()
+                        updateState(
+                            Denied()
+                        )
                     } else {
-                        updateState(Denied(true))
+                        updateState(
+                            Denied(
+                                shouldNavigateToSettings = true
+                            )
+                        )
                     }
-                    PermissionStatus.Granted -> storage.edit { remove(KEY_PERMISSION_ATTEMPTS) }
+
+                    PermissionStatus.Granted -> {
+                        updateState(Granted)
+                        viewModelScope.launch {
+                            requestLocationUseCase()
+                        }
+                        storage.edit { remove(KEY_PERMISSION_ATTEMPTS) }
+                    }
+
                     else -> {}
                 }
             }
@@ -66,11 +84,10 @@ class PermissionViewModel @Inject constructor(
     }
 
     private fun sendLaunchAction() {
-        val attemptsCount = storage.getInt(KEY_PERMISSION_ATTEMPTS, 0)
         storage.edit {
-            putInt(KEY_PERMISSION_ATTEMPTS, attemptsCount + 1)
+            putInt(KEY_PERMISSION_ATTEMPTS, attemptsMade + 1)
         }
-        Timber.d("sendLaunchAction: ${attemptsCount + 1}")
+        Timber.d("sendLaunchAction: $attemptsMade")
         sendAction(PermissionAction.RequestPermission)
     }
 

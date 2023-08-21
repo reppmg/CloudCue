@@ -66,7 +66,7 @@ fun PermissionRationale(
                         )
                 ) {
                     Text(
-                        text = if (viewModelPermissionState.shouldNavigateToSettings) {
+                        text = if (!viewModelPermissionState.shouldNavigateToSettings) {
                             "Grant permission"
                         } else {
                             "Go to settings"
