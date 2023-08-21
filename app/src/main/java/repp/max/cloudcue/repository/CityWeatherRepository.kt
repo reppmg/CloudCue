@@ -2,6 +2,7 @@ package repp.max.cloudcue.repository
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -40,6 +41,8 @@ class CityWeatherRepository @Inject constructor(
     private val weatherApi: WeatherApi,
     private val cityTimeApi: CityTimeApi
 ) {
+    @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
+    private val flowUpdateScope = newSingleThreadContext("weatherFlow")
     private val _weathersFlow = MutableStateFlow<List<CityWeather>>(listOf())
     val weathersFlow: StateFlow<List<CityWeather>> = _weathersFlow
 
@@ -117,9 +120,11 @@ class CityWeatherRepository @Inject constructor(
             requireNotNull(weatherDto.main?.temp) + Constants.kelvinZero,
             condition.toModel()
         )
-        val currentList = _weathersFlow.value
-        val newList = currentList.filter { it.city.name != city.name }.plus(cityWeather)
-        _weathersFlow.emit(newList)
+        withContext(flowUpdateScope){
+            val currentList = _weathersFlow.value
+            val newList = currentList.filter { it.city.name != city.name }.plus(cityWeather)
+            _weathersFlow.emit(newList)
+        }
         Timber.d("loadWeatherForCity:  emitted a new list in $_weathersFlow")
         return cityWeather
     }
@@ -157,17 +162,19 @@ class CityWeatherRepository @Inject constructor(
         try {
             Timber.d("fetchCityTime: ")
             val cityGmt = cityTimeApi.fetchGmt(location.latitude, location.longitude)
-            _weathersFlow.emit(_weathersFlow.value.map { cityWeather ->
-                if (cityWeather.city.location.isSameCity(location)) {
-                    cityWeather.copy(
-                        city = cityWeather.city.copy(
-                            gmtOffset = cityGmt.gmtOffsetHours
+            withContext(flowUpdateScope){
+                _weathersFlow.emit(_weathersFlow.value.map { cityWeather ->
+                    if (cityWeather.city.location.isSameCity(location)) {
+                        cityWeather.copy(
+                            city = cityWeather.city.copy(
+                                gmtOffset = cityGmt.gmtOffsetHours
+                            )
                         )
-                    )
-                } else {
-                    cityWeather
-                }
-            })
+                    } else {
+                        cityWeather
+                    }
+                })
+            }
         } catch (e: Exception) {
             Timber.w(e, "Error loading city time")
         }

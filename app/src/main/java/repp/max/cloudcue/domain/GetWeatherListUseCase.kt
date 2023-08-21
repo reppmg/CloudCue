@@ -1,5 +1,6 @@
 package repp.max.cloudcue.domain
 
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -20,13 +21,17 @@ class GetWeatherListUseCase @Inject constructor(
     private val locationProvider: LocationProvider,
     private val singletoneScope: CoroutineScope
 ) {
+    private val handler = CoroutineExceptionHandler { _, e ->
+        Timber.e(e)
+    }
+
     init {
         singletoneScope.launch {
             locationProvider.locationFlow
                 .collect {
                     Timber.d("onNewLocation: ")
                     if (it != null) {
-                        launch(Dispatchers.IO) {
+                        launch(Dispatchers.IO + handler) {
                             repository.loadWeather(it)
                         }
                     }
@@ -38,7 +43,7 @@ class GetWeatherListUseCase @Inject constructor(
         Timber.d("invoke: ")
         coroutineScope {
             Config.citiesList.forEach {
-                launch(Dispatchers.IO) { repository.loadWeather(it) }
+                launch(handler + Dispatchers.IO) { repository.loadWeather(it) }
             }
         }
         return repository.weathersFlow.map {

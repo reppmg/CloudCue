@@ -29,6 +29,7 @@ fun Navigation() {
                 checkNotNull(LocalCityWeatherViewModelFactory.current)
             val city = requireNotNull(it.arguments?.getString("cityId"))
             CityDetailsScreen(
+                navController = navController,
                 viewModel = viewModel(
                     factory = CityDetailsViewModel.factory(viewModelAssistedFactory, city)
                 )
