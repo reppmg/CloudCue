@@ -7,5 +7,5 @@ object Config {
     const val gmtBaseUrl = "https://api.timezonedb.com/v2.1/"
     const val gmtApiKey = "6OAMSL5FEONK"
 
-    val citiesList = listOf("Dubai"/*,"Toronto","Tokyo"*/)
+    val citiesList = listOf("Dubai","Toronto","Tokyo")
 }

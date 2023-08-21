@@ -6,24 +6,34 @@ data class Location(
 ) {
 
     fun isSameCity(other: Location) : Boolean {
-        return getDistanceBetween(latitude, longitude, other.latitude, other.longitude) < sameCityThresholdMeters
+        val distanceBetween =
+            distanceBetween(this, other)
+        return distanceBetween < sameCityThresholdMeters
     }
 
-    fun convertToRadian(x: Double) = x * Math.PI / 180;
+    private fun convertToRadian(x: Double) = x * Math.PI / 180;
 
-    fun getDistanceBetween(lat1: Double, lat2: Double, lng1: Double, lng2: Double): Double {
-        val R = 6378137; // Earth’s mean radius in meter
-        val dLat = convertToRadian(lat2 - lat1);
-        val dLong = convertToRadian(lng2 - lng1);
-        val a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(convertToRadian(lat1)) * Math.cos(
-                convertToRadian(lat2)
-            ) * Math.sin(dLong / 2) * Math.sin(dLong / 2);
-        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // returns the distance in meter
+    private fun distanceBetween(loc1: Location, loc2: Location): Double {
+        val earthRadius = 6371e3 // in meters
+
+        val lat1Rad = Math.toRadians(loc1.latitude)
+        val lat2Rad = Math.toRadians(loc2.latitude)
+
+        val deltaLat = Math.toRadians(loc2.latitude - loc1.latitude)
+        val deltaLon = Math.toRadians(loc2.longitude - loc1.longitude)
+
+        val a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+                Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2)
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+        return earthRadius * c
     }
 
     companion object {
-        private const val sameCityThresholdMeters = 10_000
+        private const val sameCityThresholdMeters = 100_000
+        fun android.location.Location.toLocation(): Location {
+            return Location(latitude, longitude)
+        }
     }
 }

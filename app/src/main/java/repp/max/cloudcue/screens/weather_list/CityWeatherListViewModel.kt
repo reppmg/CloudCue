@@ -28,7 +28,7 @@ class CityWeatherListViewModel @Inject constructor(
                 Timber.d("collecting $this: ")
             }.collect {
                 Timber.d("weather: $it")
-                updateState(WeatherListState.WeatherList(it.filterNotNull()))
+                updateState(WeatherListState.WeatherList(it))
             }
         }
     }

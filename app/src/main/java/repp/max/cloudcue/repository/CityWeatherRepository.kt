@@ -1,7 +1,22 @@
 package repp.max.cloudcue.repository
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consume
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import okio.IOException
 import repp.max.cloudcue.Constants
 import repp.max.cloudcue.api.CityTimeApi
@@ -18,6 +33,7 @@ import repp.max.cloudcue.takeEach
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.coroutineContext
 
 @Singleton
 class CityWeatherRepository @Inject constructor(
@@ -26,6 +42,18 @@ class CityWeatherRepository @Inject constructor(
 ) {
     private val _weathersFlow = MutableStateFlow<List<CityWeather>>(listOf())
     val weathersFlow: StateFlow<List<CityWeather>> = _weathersFlow
+
+    private val channel =
+        Channel<Location>(Channel.UNLIMITED)
+
+    init {
+        CoroutineScope(Dispatchers.Default).launch {
+            for (item in channel) {
+                actualFetchCityTime(item)
+                delay(500)
+            }
+        }
+    }
 
     suspend fun loadDetails(cityName: String): CityWeatherDetails {
         val cityWeather = loadWeather(cityName)
@@ -99,8 +127,8 @@ class CityWeatherRepository @Inject constructor(
     private suspend fun fetchCity(location: Location): City {
         val cityLocationDto =
             weatherApi.decodeCity(location.latitude, location.longitude).firstOrNull()
-        val gmtOffset = fetchCityTime(location)?.gmtOffsetHours
-        return requireNotNull(cityLocationDto?.toCity(gmtOffset))
+        fetchCityTime(location)
+        return requireNotNull(cityLocationDto?.toCity(null))
     }
 
     private suspend fun fetchCity(cityName: String): City {
@@ -112,22 +140,36 @@ class CityWeatherRepository @Inject constructor(
             cityLocation.lat,
             cityLocation.lon,
         )
-        val cityGmt = fetchCityTime(location)
+        fetchCityTime(location)
         return City(
             cityName,
             location,
-            cityGmt?.gmtOffsetHours
+            null
         )
     }
 
-    private suspend fun fetchCityTime(location: Location): CityTimeDto? {
-        val cityGmt = try {
-            cityTimeApi.fetchGmt(location.latitude, location.longitude)
-        } catch (e: IOException) {
-            Timber.w(e, "Error loading city time")
-            null
-        }
-        return cityGmt
-    }
 
+    //due to 429, async with delay
+    private suspend fun fetchCityTime(location: Location) {
+        channel.send(location)
+    }
+    private suspend fun actualFetchCityTime(location: Location) {
+        try {
+            Timber.d("fetchCityTime: ")
+            val cityGmt = cityTimeApi.fetchGmt(location.latitude, location.longitude)
+            _weathersFlow.emit(_weathersFlow.value.map { cityWeather ->
+                if (cityWeather.city.location.isSameCity(location)) {
+                    cityWeather.copy(
+                        city = cityWeather.city.copy(
+                            gmtOffset = cityGmt.gmtOffsetHours
+                        )
+                    )
+                } else {
+                    cityWeather
+                }
+            })
+        } catch (e: Exception) {
+            Timber.w(e, "Error loading city time")
+        }
+    }
 }
